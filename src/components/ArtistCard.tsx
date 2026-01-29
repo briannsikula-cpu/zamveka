@@ -1,14 +1,25 @@
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, UserPlus, UserCheck } from "lucide-react";
+import { useFollowArtist } from "@/hooks/useFollowArtist";
 
 interface ArtistCardProps {
+  id: string;
   name: string;
   imageUrl: string;
   verified?: boolean;
-  followers?: string;
+  followers?: number;
 }
 
-export const ArtistCard = ({ name, imageUrl, verified, followers }: ArtistCardProps) => {
+export const ArtistCard = ({ id, name, imageUrl, verified, followers }: ArtistCardProps) => {
+  const { isFollowing, isLoading, toggleFollow } = useFollowArtist(id);
+
+  const formatFollowers = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -5 }}
@@ -35,10 +46,40 @@ export const ArtistCard = ({ name, imageUrl, verified, followers }: ArtistCardPr
         <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
           {name}
         </h3>
-        {followers && (
-          <p className="text-xs text-muted-foreground mt-0.5">{followers} followers</p>
+        {followers !== undefined && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {formatFollowers(followers)} followers
+          </p>
         )}
       </div>
+
+      {/* Follow Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleFollow();
+        }}
+        disabled={isLoading}
+        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
+          isFollowing
+            ? "bg-primary/20 text-primary border border-primary/30"
+            : "gradient-button text-white"
+        }`}
+      >
+        {isFollowing ? (
+          <>
+            <UserCheck className="w-3.5 h-3.5" />
+            Following
+          </>
+        ) : (
+          <>
+            <UserPlus className="w-3.5 h-3.5" />
+            Follow
+          </>
+        )}
+      </motion.button>
     </motion.div>
   );
 };
