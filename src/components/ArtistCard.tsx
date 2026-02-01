@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Check, UserPlus, UserCheck } from "lucide-react";
+import { BadgeCheck, UserPlus, UserCheck } from "lucide-react";
 import { useFollowArtist } from "@/hooks/useFollowArtist";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface ArtistCardProps {
   id: string;
@@ -10,76 +12,75 @@ interface ArtistCardProps {
   followers?: number;
 }
 
-export const ArtistCard = ({ id, name, imageUrl, verified, followers }: ArtistCardProps) => {
+export const ArtistCard = ({ id, name, imageUrl, verified, followers = 0 }: ArtistCardProps) => {
   const { isFollowing, isLoading, toggleFollow } = useFollowArtist(id);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const formatFollowers = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`;
-    }
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
+  };
+
+  const handleFollowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    toggleFollow();
   };
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05, y: -5 }}
-      className="flex flex-col items-center gap-3 cursor-pointer group"
+      whileHover={{ scale: 1.02 }}
+      className="group cursor-pointer"
     >
-      {/* Avatar */}
-      <div className="relative">
-        <div className="w-32 h-32 rounded-full overflow-hidden ring-2 ring-transparent group-hover:ring-primary transition-all duration-300">
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        </div>
+      {/* Image Container - Spotify-style square card */}
+      <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
+        <img
+          src={imageUrl}
+          alt={name}
+          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
+        />
+        
+        {/* Follow Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          whileHover={{ scale: 1.1 }}
+          onClick={handleFollowClick}
+          disabled={isLoading}
+          className={`absolute bottom-2 right-2 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg ${
+            isFollowing 
+              ? 'bg-primary text-primary-foreground' 
+              : 'gradient-button'
+          }`}
+        >
+          {isFollowing ? (
+            <UserCheck className="w-5 h-5" />
+          ) : (
+            <UserPlus className="w-5 h-5" />
+          )}
+        </motion.button>
+
+        {/* Verified Badge */}
         {verified && (
-          <div className="absolute bottom-1 right-1 gradient-button p-1.5 rounded-full">
-            <Check className="w-3 h-3" />
+          <div className="absolute top-2 right-2">
+            <BadgeCheck className="w-5 h-5 text-secondary fill-secondary/20" />
           </div>
         )}
       </div>
 
-      {/* Info */}
-      <div className="text-center">
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+      {/* Info - Clean minimal style */}
+      <div className="space-y-1">
+        <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors text-sm flex items-center gap-1">
           {name}
         </h3>
-        {followers !== undefined && (
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {formatFollowers(followers)} followers
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          {formatFollowers(followers)} followers
+        </p>
       </div>
-
-      {/* Follow Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleFollow();
-        }}
-        disabled={isLoading}
-        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
-          isFollowing
-            ? "bg-primary/20 text-primary border border-primary/30"
-            : "gradient-button text-white"
-        }`}
-      >
-        {isFollowing ? (
-          <>
-            <UserCheck className="w-3.5 h-3.5" />
-            Following
-          </>
-        ) : (
-          <>
-            <UserPlus className="w-3.5 h-3.5" />
-            Follow
-          </>
-        )}
-      </motion.button>
     </motion.div>
   );
 };

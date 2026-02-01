@@ -1,6 +1,5 @@
-import { Play, Heart, Download } from "lucide-react";
+import { Play, Heart } from "lucide-react";
 import { motion } from "framer-motion";
-import { GlassCard } from "./ui/GlassCard";
 
 interface TrackCardProps {
   title: string;
@@ -12,64 +11,54 @@ interface TrackCardProps {
 
 export const TrackCard = ({ title, artist, imageUrl, plays, duration }: TrackCardProps) => {
   return (
-    <GlassCard className="p-0 overflow-hidden group cursor-pointer">
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden">
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      className="group cursor-pointer"
+    >
+      {/* Image Container - Spotify-style square card */}
+      <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
-        {/* Play Button */}
+        {/* Play Button - Spotify style */}
         <motion.button
-          initial={{ scale: 0, opacity: 0 }}
+          initial={{ opacity: 0, y: 10 }}
           whileHover={{ scale: 1.1 }}
-          className="absolute bottom-4 right-4 gradient-button p-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0"
+          className="absolute bottom-2 right-2 gradient-button p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg"
         >
           <Play className="w-5 h-5 fill-current" />
         </motion.button>
 
         {/* Duration Badge */}
         {duration && (
-          <span className="absolute top-3 right-3 glass-card text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
             {duration}
           </span>
         )}
+        
+        {/* Like Button */}
+        <motion.button
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          className="absolute top-2 left-2 text-foreground/80 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+        >
+          <Heart className="w-5 h-5" />
+        </motion.button>
       </div>
 
-      {/* Info */}
-      <div className="p-4">
-        <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+      {/* Info - Clean minimal style */}
+      <div className="space-y-1">
+        <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors text-sm">
           {title}
         </h3>
-        <p className="text-sm text-muted-foreground truncate mt-1">{artist}</p>
-        
-        {/* Stats & Actions */}
-        <div className="flex items-center justify-between mt-3">
-          {plays && (
-            <span className="text-xs text-muted-foreground">{plays} plays</span>
-          )}
-          <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              className="text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <Heart className="w-4 h-4" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              className="text-muted-foreground hover:text-secondary transition-colors"
-            >
-              <Download className="w-4 h-4" />
-            </motion.button>
-          </div>
-        </div>
+        <p className="text-xs text-muted-foreground truncate">{artist}</p>
+        {plays && (
+          <p className="text-xs text-muted-foreground">{plays} plays</p>
+        )}
       </div>
-    </GlassCard>
+    </motion.div>
   );
 };
