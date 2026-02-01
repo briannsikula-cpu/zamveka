@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Star, ChevronRight } from "lucide-react";
 import { ArtistCard } from "./ArtistCard";
+import { EmptyState } from "./EmptyState";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,8 +37,10 @@ export const FeaturedArtists = () => {
     setLoading(false);
   };
 
+  const isEmpty = !loading && artists.length === 0;
+
   return (
-    <section className="py-16 relative overflow-hidden">
+    <section className="py-12 relative overflow-hidden">
       {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
       
@@ -47,7 +50,7 @@ export const FeaturedArtists = () => {
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="flex items-center justify-between mb-10"
+          className="flex items-center justify-between mb-8"
         >
           <div className="flex items-center gap-3">
             <div className="gradient-button p-2.5 rounded-xl">
@@ -59,27 +62,31 @@ export const FeaturedArtists = () => {
             </div>
           </div>
           
-          <Link to="/artists">
-            <motion.button
-              whileHover={{ x: 5 }}
-              className="flex items-center gap-1 text-primary text-sm font-medium"
-            >
-              View All <ChevronRight className="w-4 h-4" />
-            </motion.button>
-          </Link>
+          {!isEmpty && (
+            <Link to="/artists">
+              <motion.button
+                whileHover={{ x: 5 }}
+                className="flex items-center gap-1 text-primary text-sm font-medium"
+              >
+                View All <ChevronRight className="w-4 h-4" />
+              </motion.button>
+            </Link>
+          )}
         </motion.div>
 
-        {/* Artists Grid */}
+        {/* Content */}
         {loading ? (
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-3">
-                <div className="w-32 h-32 rounded-full bg-muted animate-pulse" />
+                <div className="w-full aspect-square rounded-lg bg-muted animate-pulse" />
                 <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                 <div className="h-3 w-16 bg-muted rounded animate-pulse" />
               </div>
             ))}
           </div>
+        ) : isEmpty ? (
+          <EmptyState type="artists" />
         ) : (
           <motion.div
             initial="hidden"
@@ -90,7 +97,7 @@ export const FeaturedArtists = () => {
                 transition: { staggerChildren: 0.1 },
               },
             }}
-            className="grid grid-cols-3 md:grid-cols-6 gap-6 md:gap-8"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
           >
             {artists.map((artist) => (
               <motion.div
