@@ -1,18 +1,33 @@
-import { Search, User, Menu, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Search, User, Menu, X, Settings, LogOut } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Trending", path: "/trending" },
   { name: "About", path: "/about" },
-  { name: "Apply", path: "/apply" },
 ];
 
 export const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -62,16 +77,49 @@ export const Header = () => {
                 <Search className="w-5 h-5 text-muted-foreground" />
               </motion.button>
               
-              <Link to="/auth">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="gradient-button py-2 px-5 rounded-full text-sm font-semibold hidden md:flex items-center gap-2"
-                >
-                  <User className="w-4 h-4" />
-                  Sign In
-                </motion.button>
-              </Link>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="glass-button p-2.5 rounded-full hidden md:flex"
+                    >
+                      <Menu className="w-5 h-5 text-muted-foreground" />
+                    </motion.button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 glass-card border-border/30">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                        <User className="w-4 h-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="w-4 h-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/auth">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="gradient-button py-2 px-5 rounded-full text-sm font-semibold hidden md:flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Sign In
+                  </motion.button>
+                </Link>
+              )}
 
               {/* Mobile Menu Toggle */}
               <button
@@ -113,13 +161,45 @@ export const Header = () => {
                   {link.name}
                 </Link>
               ))}
-              <Link
-                to="/auth"
-                onClick={() => setMobileMenuOpen(false)}
-                className="gradient-button py-3 px-6 rounded-full text-center font-semibold mt-2"
-              >
-                Sign In
-              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base font-medium py-2 text-muted-foreground flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base font-medium py-2 text-muted-foreground flex items-center gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-base font-medium py-2 text-destructive flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="gradient-button py-3 px-6 rounded-full text-center font-semibold mt-2"
+                >
+                  Sign In
+                </Link>
+              )}
             </nav>
           </motion.div>
         )}

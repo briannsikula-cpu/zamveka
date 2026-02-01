@@ -9,7 +9,10 @@ import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Apply from "./pages/Apply";
 import Trending from "./pages/Trending";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -25,6 +28,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/apply" element={<Apply />} />
             <Route path="/trending" element={<Trending />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

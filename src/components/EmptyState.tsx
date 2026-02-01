@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
-import { Upload, Music, Mic2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { GradientButton } from "./ui/GradientButton";
+import { Music, Mic2 } from "lucide-react";
 
 interface EmptyStateProps {
   type: "tracks" | "artists";
@@ -12,20 +10,16 @@ export const EmptyState = ({ type }: EmptyStateProps) => {
     tracks: {
       icon: Music,
       title: "No tracks yet",
-      description: "Be the first to share your music with the world",
-      buttonText: "Upload Your Track",
-      link: "/apply",
+      description: "Be the first to discover amazing music from Malawi",
     },
     artists: {
       icon: Mic2,
       title: "No artists yet",
-      description: "Join our community of talented artists",
-      buttonText: "Become an Artist",
-      link: "/apply",
+      description: "Talented artists will appear here soon",
     },
   };
 
-  const { icon: Icon, title, description, buttonText, link } = config[type];
+  const { icon: Icon, title, description } = config[type];
 
   return (
     <motion.div
@@ -45,13 +39,7 @@ export const EmptyState = ({ type }: EmptyStateProps) => {
       </div>
       
       <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground text-center max-w-sm mb-6">{description}</p>
-      
-      <Link to={link}>
-        <GradientButton icon={<Upload className="w-5 h-5" />}>
-          {buttonText}
-        </GradientButton>
-      </Link>
+      <p className="text-muted-foreground text-center max-w-sm">{description}</p>
     </motion.div>
   );
 };
