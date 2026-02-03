@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "./ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,6 +77,11 @@ export const Header = () => {
               >
                 <Search className="w-5 h-5 text-muted-foreground" />
               </motion.button>
+
+              {/* Theme Toggle */}
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
               
               {user ? (
                 <DropdownMenu>
