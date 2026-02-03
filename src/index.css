@@ -10,13 +10,13 @@
 
 @layer base {
   :root {
-    --background: 240 20% 6%;
+    --background: 240 25% 3%;
     --foreground: 0 0% 98%;
 
-    --card: 240 15% 10%;
+    --card: 240 20% 6%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 15% 10%;
+    --popover: 240 20% 6%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 280 85% 60%;
@@ -25,8 +25,8 @@
     --secondary: 320 90% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 15% 18%;
-    --muted-foreground: 240 10% 65%;
+    --muted: 240 20% 12%;
+    --muted-foreground: 240 10% 60%;
 
     --accent: 200 100% 55%;
     --accent-foreground: 0 0% 100%;
@@ -34,8 +34,8 @@
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 280 20% 25%;
-    --input: 240 15% 14%;
+    --border: 280 20% 18%;
+    --input: 240 20% 8%;
     --ring: 280 85% 60%;
 
     --radius: 1rem;
@@ -43,44 +43,44 @@
     /* Custom ZAMVEKA tokens - Enhanced liquid glass */
     --gradient-primary: linear-gradient(135deg, hsl(280 85% 60%), hsl(320 90% 55%), hsl(200 100% 55%));
     --gradient-hero: linear-gradient(135deg, hsl(280 80% 50%), hsl(320 85% 50%), hsl(200 90% 50%));
-    --gradient-background: radial-gradient(ellipse at top left, hsla(280 60% 40% / 0.4) 0%, hsla(320 50% 20% / 0.2) 30%, hsl(240 20% 6%) 60%);
-    --glass-bg: hsla(280, 30%, 15%, 0.4);
-    --glass-border: hsla(280, 50%, 70%, 0.15);
-    --glass-shadow: 0 8px 32px hsla(280, 50%, 20%, 0.3), 0 0 80px hsla(320, 80%, 50%, 0.1);
-    --glass-highlight: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1) 0%, hsla(0, 0%, 100%, 0) 50%);
-    --glow-primary: 0 0 40px hsla(280, 85%, 60%, 0.5), 0 0 80px hsla(320, 90%, 55%, 0.2);
-    --glow-secondary: 0 0 30px hsla(200, 100%, 55%, 0.4);
-    --glow-accent: 0 0 25px hsla(320, 90%, 55%, 0.5);
+    --gradient-background: radial-gradient(ellipse at top left, hsla(280 50% 25% / 0.4) 0%, hsla(320 40% 12% / 0.2) 30%, hsl(240 25% 3%) 60%);
+    --glass-bg: hsla(280, 30%, 8%, 0.6);
+    --glass-border: hsla(280, 50%, 60%, 0.12);
+    --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.5), 0 0 80px hsla(320, 80%, 40%, 0.08);
+    --glass-highlight: linear-gradient(135deg, hsla(0, 0%, 100%, 0.08) 0%, hsla(0, 0%, 100%, 0) 50%);
+    --glow-primary: 0 0 40px hsla(280, 85%, 60%, 0.4), 0 0 80px hsla(320, 90%, 55%, 0.15);
+    --glow-secondary: 0 0 30px hsla(200, 100%, 55%, 0.3);
+    --glow-accent: 0 0 25px hsla(320, 90%, 55%, 0.4);
 
-    --sidebar-background: 240 20% 6%;
+    --sidebar-background: 240 25% 3%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 280 85% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 15% 18%;
+    --sidebar-accent: 240 20% 12%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 280 20% 25%;
+    --sidebar-border: 280 20% 18%;
     --sidebar-ring: 280 85% 60%;
   }
 
   .dark {
-    --background: 240 20% 6%;
+    --background: 240 25% 3%;
     --foreground: 0 0% 98%;
-    --card: 240 15% 10%;
+    --card: 240 20% 6%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 15% 10%;
+    --popover: 240 20% 6%;
     --popover-foreground: 0 0% 98%;
     --primary: 280 85% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 320 90% 55%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 240 15% 18%;
-    --muted-foreground: 240 10% 65%;
+    --muted: 240 20% 12%;
+    --muted-foreground: 240 10% 60%;
     --accent: 200 100% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 280 20% 25%;
-    --input: 240 15% 14%;
+    --border: 280 20% 18%;
+    --input: 240 20% 8%;
     --ring: 280 85% 60%;
   }
 }
