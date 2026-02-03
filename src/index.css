@@ -83,6 +83,35 @@
     --input: 240 20% 8%;
     --ring: 280 85% 60%;
   }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 240 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 20% 10%;
+    --primary: 280 85% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 320 90% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 10% 92%;
+    --muted-foreground: 240 10% 40%;
+    --accent: 200 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 85%;
+    --input: 240 10% 95%;
+    --ring: 280 85% 55%;
+
+    --gradient-background: linear-gradient(135deg, hsla(280, 30%, 95%, 1) 0%, hsla(320, 20%, 98%, 1) 50%, hsla(200, 30%, 95%, 1) 100%);
+    --glass-bg: hsla(0, 0%, 100%, 0.7);
+    --glass-border: hsla(280, 30%, 70%, 0.2);
+    --glass-shadow: 0 8px 32px hsla(280, 30%, 50%, 0.1);
+    --glass-highlight: linear-gradient(135deg, hsla(0, 0%, 100%, 0.5) 0%, hsla(0, 0%, 100%, 0) 50%);
+    --glow-primary: 0 4px 20px hsla(280, 85%, 55%, 0.25);
+  }
 }
 
 @layer base {
