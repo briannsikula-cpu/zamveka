@@ -7,11 +7,14 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import About from "./pages/About";
 import Apply from "./pages/Apply";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/AdminDashboard";
+import PendingApproval from "./pages/PendingApproval";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,11 +30,14 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/about" element={<About />} />
               <Route path="/apply" element={<Apply />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/pending-approval" element={<PendingApproval />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
