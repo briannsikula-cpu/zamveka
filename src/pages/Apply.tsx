@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
  import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -15,6 +15,8 @@ export default function Apply() {
    const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
    const [loading, setLoading] = useState(false);
+  const [isApprovedArtist, setIsApprovedArtist] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
   const [formData, setFormData] = useState({
     fullName: "",
     stageName: "",
@@ -24,6 +26,32 @@ export default function Apply() {
     genre: "",
     bio: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      checkArtistStatus();
+    } else {
+      setCheckingStatus(false);
+    }
+  }, [user]);
+
+  const checkArtistStatus = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from("user_approvals")
+        .select("status")
+        .eq("user_id", user.id)
+        .eq("status", "approved")
+        .maybeSingle();
+      
+      setIsApprovedArtist(!!data);
+    } catch (error) {
+      console.error("Error checking artist status:", error);
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +106,42 @@ export default function Apply() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // If user is already an approved artist, show message
+  if (!checkingStatus && isApprovedArtist) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="pt-32 pb-20 px-4">
+          <div className="container mx-auto flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full max-w-md"
+            >
+              <GlassCard className="text-center py-12" hover={false}>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center"
+                >
+                  <CheckCircle className="w-10 h-10 text-primary" />
+                </motion.div>
+                <h2 className="text-2xl font-bold mb-3">You're Already an Artist!</h2>
+                <p className="text-muted-foreground mb-6">
+                  You're approved as a ZAMVEKA artist. Head to your profile to upload music and manage your content.
+                </p>
+                <GradientButton onClick={() => navigate("/profile")}>
+                  Go to Profile
+                </GradientButton>
+              </GlassCard>
+            </motion.div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (

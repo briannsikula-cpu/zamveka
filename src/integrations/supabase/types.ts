@@ -53,6 +53,7 @@ export type Database = {
           image_url: string | null
           name: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           bio?: string | null
@@ -63,6 +64,7 @@ export type Database = {
           image_url?: string | null
           name: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           bio?: string | null
@@ -73,6 +75,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -102,6 +105,85 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      song_likes: {
+        Row: {
+          created_at: string
+          id: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_likes_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      songs: {
+        Row: {
+          artist_id: string
+          cover_url: string | null
+          created_at: string
+          duration: number | null
+          file_url: string
+          genre: string | null
+          id: string
+          likes_count: number
+          plays_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          cover_url?: string | null
+          created_at?: string
+          duration?: number | null
+          file_url: string
+          genre?: string | null
+          id?: string
+          likes_count?: number
+          plays_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          cover_url?: string | null
+          created_at?: string
+          duration?: number | null
+          file_url?: string
+          genre?: string | null
+          id?: string
+          likes_count?: number
+          plays_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "songs_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_approvals: {
         Row: {
