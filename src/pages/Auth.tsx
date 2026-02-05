@@ -89,17 +89,29 @@ export default function Auth() {
           .eq("user_id", data.user.id)
           .maybeSingle();
 
-        if (approvalData?.status === "approved") {
-          toast.success("Welcome back!");
-          navigate("/");
-        } else if (approvalData?.status === "suspended") {
+         // If no approval record, user is a regular user - allow access
+         if (!approvalData) {
+           toast.success("Welcome back!");
+           navigate("/");
+           return;
+         }
+ 
+         // Check approval status for artists
+         if (approvalData.status === "approved") {
+           toast.success("Welcome back!");
+           navigate("/");
+         } else if (approvalData.status === "suspended") {
           toast.error("Your account has been suspended");
           await supabase.auth.signOut();
-        } else if (approvalData?.status === "rejected") {
+         } else if (approvalData.status === "rejected") {
           toast.error("Your registration was rejected");
           await supabase.auth.signOut();
-        } else {
+         } else if (approvalData.status === "pending") {
+           // Only artists wait for approval
           navigate("/pending-approval");
+         } else {
+           toast.success("Welcome back!");
+           navigate("/");
         }
       }
     } catch (error: any) {
@@ -144,23 +156,12 @@ export default function Auth() {
       if (error) throw error;
 
       if (data.user) {
-        // Create approval record
-        const { error: approvalError } = await supabase
-          .from("user_approvals")
-          .insert({
-            user_id: data.user.id,
-            email: signupEmail,
-            display_name: signupName,
-            auth_provider: "email",
-            status: "pending",
-          });
-
-        if (approvalError) {
-          console.error("Error creating approval record:", approvalError);
-        }
-
-        toast.success("Account created! Awaiting admin approval.");
-        navigate("/pending-approval");
+         // Regular users don't need approval - they get immediate access
+         toast.success("Account created successfully! You can now sign in.");
+         setActiveTab("login");
+         setSignupEmail("");
+         setSignupPassword("");
+         setSignupName("");
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -322,9 +323,6 @@ export default function Auth() {
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
                     </Button>
-                    <p className="text-xs text-center text-muted-foreground">
-                      New accounts require admin approval before access is granted.
-                    </p>
                   </form>
                 </TabsContent>
               </Tabs>
