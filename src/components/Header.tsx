@@ -1,9 +1,9 @@
-import { Search, User, Menu, X, Settings, LogOut } from "lucide-react";
+ import { Search, User, Menu, X, Settings, LogOut, Shield } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+ import { useState, useEffect } from "react";
+ import { useAuth } from "@/hooks/useAuth";
+ import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   DropdownMenu,
@@ -24,6 +24,26 @@ export const Header = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+   const [isAdmin, setIsAdmin] = useState(false);
+ 
+   useEffect(() => {
+     if (user) {
+       checkAdminStatus();
+     } else {
+       setIsAdmin(false);
+     }
+   }, [user]);
+ 
+   const checkAdminStatus = async () => {
+     if (!user) return;
+     const { data } = await supabase
+       .from("user_roles")
+       .select("role")
+       .eq("user_id", user.id)
+       .eq("role", "admin")
+       .maybeSingle();
+     setIsAdmin(!!data);
+   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -101,6 +121,14 @@ export const Header = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
+                     {isAdmin && (
+                       <DropdownMenuItem asChild>
+                         <Link to="/admin" className="flex items-center gap-2 cursor-pointer text-primary">
+                           <Shield className="w-4 h-4" />
+                           Admin Dashboard
+                         </Link>
+                       </DropdownMenuItem>
+                     )}
                     <DropdownMenuItem asChild>
                       <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                         <Settings className="w-4 h-4" />
@@ -178,6 +206,16 @@ export const Header = () => {
                     <User className="w-4 h-4" />
                     Profile
                   </Link>
+                   {isAdmin && (
+                     <Link
+                       to="/admin"
+                       onClick={() => setMobileMenuOpen(false)}
+                       className="text-base font-medium py-2 text-primary flex items-center gap-2"
+                     >
+                       <Shield className="w-4 h-4" />
+                       Admin Dashboard
+                     </Link>
+                   )}
                   <Link
                     to="/settings"
                     onClick={() => setMobileMenuOpen(false)}

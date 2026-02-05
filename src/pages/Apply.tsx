@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { Music, Upload, CheckCircle, User, Mail, Phone, MapPin, Mic } from "lucide-react";
+ import { useAuth } from "@/hooks/useAuth";
+ import { supabase } from "@/integrations/supabase/client";
+ import { toast } from "sonner";
 
 export default function Apply() {
+   const navigate = useNavigate();
+   const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     stageName: "",
@@ -18,11 +25,54 @@ export default function Apply() {
     bio: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would integrate with your backend
-    console.log("Artist application:", formData);
-    setSubmitted(true);
+     
+     if (!user) {
+       toast.error("Please sign in first to apply as an artist");
+       navigate("/auth");
+       return;
+     }
+ 
+     setLoading(true);
+     try {
+       // Check if user already has an approval record
+       const { data: existingApproval } = await supabase
+         .from("user_approvals")
+         .select("id, status")
+         .eq("user_id", user.id)
+         .maybeSingle();
+ 
+       if (existingApproval) {
+         if (existingApproval.status === "pending") {
+           toast.info("You already have a pending application");
+           navigate("/pending-approval");
+           return;
+         } else if (existingApproval.status === "approved") {
+           toast.info("You're already approved as an artist!");
+           navigate("/profile");
+           return;
+         }
+       }
+ 
+       // Create approval record for artist application
+       const { error } = await supabase.from("user_approvals").insert({
+         user_id: user.id,
+         email: formData.email || user.email || "",
+         display_name: formData.stageName || formData.fullName,
+         auth_provider: "artist_application",
+         status: "pending",
+       });
+ 
+       if (error) throw error;
+ 
+       setSubmitted(true);
+     } catch (error: any) {
+       console.error("Application error:", error);
+       toast.error(error.message || "Failed to submit application");
+     } finally {
+       setLoading(false);
+     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -247,9 +297,15 @@ export default function Apply() {
                 </div>
 
                 {/* Submit */}
-                <GradientButton type="submit" className="w-full" size="lg">
-                  Submit Application
+                 <GradientButton type="submit" className="w-full" size="lg" disabled={loading}>
+                   {loading ? "Submitting..." : "Submit Application"}
                 </GradientButton>
+                 
+                 {!user && (
+                   <p className="text-xs text-center text-muted-foreground">
+                     You'll need to sign in before submitting your application.
+                   </p>
+                 )}
               </form>
             </GlassCard>
           </motion.div>
