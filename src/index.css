@@ -272,4 +272,12 @@
   .animate-liquid {
     animation: liquid-morph 8s ease-in-out infinite;
   }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
