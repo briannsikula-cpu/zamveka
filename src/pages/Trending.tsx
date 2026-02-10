@@ -1,28 +1,50 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { TrackCard } from "@/components/TrackCard";
 import { TrendingUp, Play } from "lucide-react";
 import { GradientButton } from "@/components/ui/GradientButton";
+import { SongCard } from "@/components/SongCard";
+import { MiniPlayer } from "@/components/MiniPlayer";
+import { BottomNav } from "@/components/BottomNav";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { usePlayer } from "@/contexts/PlayerContext";
 
-const allTracks = [
-  { id: 1, title: "Against the Odds", artist: "Zeidah", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400", plays: "125K", duration: "3:42" },
-  { id: 2, title: "Midnight Dreams", artist: "Eli Njuchi", imageUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400", plays: "98K", duration: "4:15" },
-  { id: 3, title: "Rise Up", artist: "Patience Namadingo", imageUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400", plays: "87K", duration: "3:58" },
-  { id: 4, title: "Lilongwe Nights", artist: "Suffix", imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400", plays: "76K", duration: "3:22" },
-  { id: 5, title: "Golden Hour", artist: "Gwamba", imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400", plays: "65K", duration: "4:01" },
-  { id: 6, title: "African Sunrise", artist: "Sangie", imageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400", plays: "54K", duration: "3:35" },
-  { id: 7, title: "Soul Fire", artist: "Faith Mussa", imageUrl: "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=400", plays: "48K", duration: "3:28" },
-  { id: 8, title: "City Lights", artist: "Tay Grin", imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400", plays: "42K", duration: "3:55" },
-  { id: 9, title: "Heartbeat", artist: "Lulu", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400", plays: "38K", duration: "4:12" },
-  { id: 10, title: "Blantyre Flow", artist: "Phyzix", imageUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400", plays: "35K", duration: "3:45" },
-  { id: 11, title: "Moonlight", artist: "Kelvin Sings", imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400", plays: "32K", duration: "3:18" },
-  { id: 12, title: "New Dawn", artist: "Martse", imageUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400", plays: "29K", duration: "4:05" },
-];
+interface Song {
+  id: string;
+  title: string;
+  file_url: string;
+  cover_url: string | null;
+  plays_count: number;
+  likes_count: number;
+  genre: string | null;
+  artists: { id: string; name: string; image_url: string | null } | null;
+}
 
 export default function Trending() {
+  const { user } = useAuth();
+  const { currentSong, isPlaying, togglePlay, playSong } = usePlayer();
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTrending();
+  }, []);
+
+  const fetchTrending = async () => {
+    const { data } = await supabase
+      .from("songs")
+      .select("*, artists(id, name, image_url)")
+      .order("plays_count", { ascending: false })
+      .limit(20);
+
+    setSongs((data as Song[]) || []);
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-32">
       <Header />
 
       <main className="pt-28 pb-10">
@@ -48,45 +70,61 @@ export default function Trending() {
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold">Trending Now</h1>
-                  <p className="text-muted-foreground">The hottest tracks in Malawi this week</p>
+                  <p className="text-muted-foreground">The hottest tracks this week</p>
                 </div>
               </div>
 
-              <GradientButton icon={<Play className="w-5 h-5 fill-current" />}>
-                Play All
-              </GradientButton>
+              {songs.length > 0 && (
+                <GradientButton
+                  icon={<Play className="w-5 h-5 fill-current" />}
+                  onClick={() => playSong(songs[0] as any, songs as any)}
+                >
+                  Play All
+                </GradientButton>
+              )}
             </motion.div>
           </div>
         </section>
 
-        {/* Tracks Grid */}
+        {/* Songs List */}
         <section className="py-8">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                visible: { transition: { staggerChildren: 0.05 } },
-              }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6"
-            >
-              {allTracks.map((track, i) => (
-                <motion.div
-                  key={track.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                >
-                  <TrackCard {...track} />
-                </motion.div>
-              ))}
-            </motion.div>
+            {loading ? (
+              <p className="text-center text-muted-foreground">Loading...</p>
+            ) : songs.length === 0 ? (
+              <div className="text-center py-16">
+                <TrendingUp className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No songs uploaded yet. Be the first artist to share your music!</p>
+              </div>
+            ) : (
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                className="space-y-3"
+              >
+                {songs.map((song) => (
+                  <motion.div
+                    key={song.id}
+                    variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                  >
+                    <SongCard
+                      song={song as any}
+                      isPlaying={currentSong?.id === song.id && isPlaying}
+                      onPlay={() => playSong(song as any, songs as any)}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </div>
         </section>
       </main>
 
-      <Footer />
+      {currentSong && (
+        <MiniPlayer song={currentSong} isPlaying={isPlaying} onTogglePlay={togglePlay} />
+      )}
+      <BottomNav />
     </div>
   );
 }
