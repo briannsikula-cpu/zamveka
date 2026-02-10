@@ -46,6 +46,7 @@ export const ArtistCard = ({ id, name, imageUrl, verified, followers = 0 }: Arti
       whileHover={{ scale: 1.03, y: -5 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="group cursor-pointer"
+      onClick={() => navigate(`/artist/${id}`)}
     >
       {/* Image Container - Enhanced glass card */}
       <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-3 glass-card">
