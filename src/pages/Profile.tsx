@@ -384,25 +384,37 @@
              </div>
            )}
  
-           {/* Regular User Content */}
-           {!isArtist && (
-             <motion.div
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: 0.1 }}
-             >
-               <GlassCard className="p-6 text-center" hover={false}>
-                 <Heart className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                 <h2 className="text-xl font-bold mb-2">Discover Music</h2>
-                 <p className="text-muted-foreground mb-4">
-                   Browse trending songs, follow your favorite artists, and build your collection.
-                 </p>
-                 <GradientButton onClick={() => window.location.href = '/trending'}>
-                   Explore Music
-                 </GradientButton>
-               </GlassCard>
-             </motion.div>
-           )}
+            {/* Regular User Content */}
+            {!isArtist && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="space-y-6"
+              >
+                <GlassCard className="p-6 text-center" hover={false}>
+                  <Music className="w-12 h-12 mx-auto text-primary mb-4" />
+                  <h2 className="text-xl font-bold mb-2">Become an Artist</h2>
+                  <p className="text-muted-foreground mb-4">
+                    Apply as an artist to upload your music, gain followers, and share your sound with the world.
+                  </p>
+                  <GradientButton onClick={() => window.location.href = '/apply'}>
+                    Apply as Artist
+                  </GradientButton>
+                </GlassCard>
+
+                <GlassCard className="p-6 text-center" hover={false}>
+                  <Heart className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-bold mb-2">Discover Music</h2>
+                  <p className="text-muted-foreground mb-4">
+                    Browse trending songs, follow your favorite artists, and build your collection.
+                  </p>
+                  <GradientButton variant="outline" onClick={() => window.location.href = '/trending'}>
+                    Explore Music
+                  </GradientButton>
+                </GlassCard>
+              </motion.div>
+            )}
          </div>
        </main>
  
