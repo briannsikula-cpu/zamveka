@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronDown, MoreVertical, Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2 } from "lucide-react";
+import { ChevronDown, MoreVertical, Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, Repeat, Repeat1, Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useSongLike } from "@/hooks/useSongLike";
@@ -12,11 +12,19 @@ const formatTime = (time: number) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
+// Simple placeholder lyrics when no real lyrics available
+const placeholderLyrics = "Lyrics not available for this track.\n\nLyrics will appear here when available.";
+
 export default function NowPlaying() {
   const navigate = useNavigate();
-  const { currentSong, isPlaying, currentTime, duration, togglePlay, seek, playNext, playPrevious } = usePlayer();
+  const {
+    currentSong, isPlaying, currentTime, duration,
+    togglePlay, seek, playNext, playPrevious,
+    shuffle, repeatMode, toggleShuffle, cycleRepeat,
+  } = usePlayer();
   const { isLiked, toggleLike } = useSongLike(currentSong?.id || "");
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
 
   if (!currentSong) {
     navigate("/");
@@ -39,21 +47,54 @@ export default function NowPlaying() {
         </button>
       </div>
 
-      {/* Cover Art */}
-      <div className="flex-1 flex items-center justify-center px-8 py-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="w-full max-w-sm aspect-square rounded-xl overflow-hidden shadow-2xl"
-        >
-          {currentSong.cover_url ? (
-            <img src={currentSong.cover_url} alt={currentSong.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-secondary/40 flex items-center justify-center">
-              <Play className="w-16 h-16 text-muted-foreground" />
+      {/* Cover Art / Lyrics toggle area */}
+      <div className="flex-1 flex items-center justify-center px-8 py-6 relative">
+        {showLyrics ? (
+          <motion.div
+            key="lyrics"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full max-w-sm h-[360px] rounded-xl overflow-hidden bg-card/80 backdrop-blur-md border border-border/20 p-6 flex flex-col"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Lyrics</h3>
+              <button
+                onClick={() => setShowLyrics(false)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Show Cover
+              </button>
             </div>
-          )}
-        </motion.div>
+            <div className="flex-1 overflow-y-auto">
+              <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                {placeholderLyrics}
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="cover"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-sm aspect-square rounded-xl overflow-hidden shadow-2xl relative group"
+          >
+            {currentSong.cover_url ? (
+              <img src={currentSong.cover_url} alt={currentSong.title} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary/40 to-secondary/40 flex items-center justify-center">
+                <Play className="w-16 h-16 text-muted-foreground" />
+              </div>
+            )}
+            {/* Lyrics button overlay */}
+            <button
+              onClick={() => setShowLyrics(true)}
+              className="absolute bottom-3 right-3 bg-background/70 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Music className="w-4 h-4 text-foreground" />
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Song Info + Controls */}
@@ -90,7 +131,10 @@ export default function NowPlaying() {
 
         {/* Controls */}
         <div className="flex items-center justify-between px-4">
-          <button className="p-2 text-muted-foreground">
+          <button
+            onClick={toggleShuffle}
+            className={`p-2 transition-colors ${shuffle ? "text-primary" : "text-muted-foreground"}`}
+          >
             <Shuffle className="w-5 h-5" />
           </button>
           <button onClick={playPrevious} className="p-2">
@@ -105,8 +149,11 @@ export default function NowPlaying() {
           <button onClick={playNext} className="p-2">
             <SkipForward className="w-6 h-6 fill-current" />
           </button>
-          <button className="p-2 text-muted-foreground">
-            <Volume2 className="w-5 h-5" />
+          <button
+            onClick={cycleRepeat}
+            className={`p-2 transition-colors ${repeatMode !== "off" ? "text-primary" : "text-muted-foreground"}`}
+          >
+            {repeatMode === "one" ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
           </button>
         </div>
       </div>
