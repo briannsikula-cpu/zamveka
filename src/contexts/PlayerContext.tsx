@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from "react";
 
+export type RepeatMode = "off" | "one" | "all";
+
 export interface PlayerSong {
   id: string;
   title: string;
@@ -18,6 +20,8 @@ interface PlayerContextType {
   duration: number;
   volume: number;
   playlist: PlayerSong[];
+  shuffle: boolean;
+  repeatMode: RepeatMode;
   playSong: (song: PlayerSong, playlist?: PlayerSong[]) => void;
   togglePlay: () => void;
   seek: (time: number) => void;
@@ -25,6 +29,8 @@ interface PlayerContextType {
   playNext: () => void;
   playPrevious: () => void;
   closeSong: () => void;
+  toggleShuffle: () => void;
+  cycleRepeat: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -37,6 +43,21 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(1);
   const [playlist, setPlaylist] = useState<PlayerSong[]>([]);
+  const [shuffle, setShuffle] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>("off");
+
+  const getNextSong = useCallback(() => {
+    if (!currentSong || playlist.length === 0) return null;
+    if (repeatMode === "one") return currentSong;
+    const idx = playlist.findIndex((s) => s.id === currentSong.id);
+    if (shuffle) {
+      const others = playlist.filter((s) => s.id !== currentSong.id);
+      return others.length > 0 ? others[Math.floor(Math.random() * others.length)] : null;
+    }
+    if (idx < playlist.length - 1) return playlist[idx + 1];
+    if (repeatMode === "all") return playlist[0];
+    return null;
+  }, [currentSong, playlist, shuffle, repeatMode]);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -48,9 +69,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     const onTime = () => setCurrentTime(audio.currentTime);
     const onMeta = () => setDuration(audio.duration);
     const onEnd = () => {
-      const idx = playlist.findIndex((s) => s.id === currentSong?.id);
-      if (idx >= 0 && idx < playlist.length - 1) {
-        playSong(playlist[idx + 1], playlist);
+      const next = getNextSong();
+      if (next) {
+        playSong(next, playlist);
       } else {
         setIsPlaying(false);
       }
@@ -65,7 +86,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       audio.removeEventListener("loadedmetadata", onMeta);
       audio.removeEventListener("ended", onEnd);
     };
-  }, [currentSong, playlist]);
+  }, [currentSong, playlist, getNextSong]);
 
   const playSong = useCallback((song: PlayerSong, pl?: PlayerSong[]) => {
     if (pl) setPlaylist(pl);
@@ -122,11 +143,18 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setDuration(0);
   }, []);
 
+  const toggleShuffle = useCallback(() => setShuffle((s) => !s), []);
+  const cycleRepeat = useCallback(() => {
+    setRepeatMode((m) => (m === "off" ? "all" : m === "all" ? "one" : "off"));
+  }, []);
+
   return (
     <PlayerContext.Provider
       value={{
         currentSong, isPlaying, currentTime, duration, volume, playlist,
+        shuffle, repeatMode,
         playSong, togglePlay, seek, setVolume, playNext, playPrevious, closeSong,
+        toggleShuffle, cycleRepeat,
       }}
     >
       {children}
