@@ -145,6 +145,7 @@ export type Database = {
           genre: string | null
           id: string
           likes_count: number
+          lyrics: string | null
           plays_count: number
           title: string
           updated_at: string
@@ -158,6 +159,7 @@ export type Database = {
           genre?: string | null
           id?: string
           likes_count?: number
+          lyrics?: string | null
           plays_count?: number
           title: string
           updated_at?: string
@@ -171,6 +173,7 @@ export type Database = {
           genre?: string | null
           id?: string
           likes_count?: number
+          lyrics?: string | null
           plays_count?: number
           title?: string
           updated_at?: string
