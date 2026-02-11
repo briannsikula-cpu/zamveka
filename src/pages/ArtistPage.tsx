@@ -95,11 +95,15 @@ export default function ArtistPage() {
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <div className="relative h-64 md:h-80 overflow-hidden">
-        <img
-          src={artist.image_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800"}
-          alt={artist.name}
-          className="w-full h-full object-cover"
-        />
+        {artist.image_url ? (
+          <img
+            src={artist.image_url}
+            alt={artist.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <button onClick={() => navigate(-1)} className="absolute top-4 left-4 p-2 rounded-full bg-background/50 backdrop-blur-sm">
           <ArrowLeft className="w-5 h-5 text-foreground" />
