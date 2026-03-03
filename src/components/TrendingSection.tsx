@@ -1,21 +1,38 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, ChevronRight } from "lucide-react";
 import { TrackCard } from "./TrackCard";
 import { EmptyState } from "./EmptyState";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-// This will be replaced with actual data from database when tracks are uploaded
-const trendingTracks: Array<{
-  id: number;
+interface TrendingSong {
+  id: string;
   title: string;
-  artist: string;
-  imageUrl: string;
-  plays?: string;
-  duration?: string;
-}> = [];
+  cover_url: string | null;
+  plays_count: number;
+  artists: { name: string } | null;
+}
 
 export const TrendingSection = () => {
-  const isEmpty = trendingTracks.length === 0;
+  const [songs, setSongs] = useState<TrendingSong[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTrending();
+  }, []);
+
+  const fetchTrending = async () => {
+    const { data } = await supabase
+      .from("songs")
+      .select("id, title, cover_url, plays_count, artists(name)")
+      .order("plays_count", { ascending: false })
+      .limit(12);
+    setSongs((data as TrendingSong[]) || []);
+    setLoading(false);
+  };
+
+  const isEmpty = !loading && songs.length === 0;
 
   return (
     <section className="py-12 relative">
@@ -50,7 +67,17 @@ export const TrendingSection = () => {
         </motion.div>
 
         {/* Content */}
-        {isEmpty ? (
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="space-y-3">
+                <div className="aspect-square rounded-2xl bg-muted animate-pulse" />
+                <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+                <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        ) : isEmpty ? (
           <EmptyState type="tracks" />
         ) : (
           <motion.div
@@ -64,15 +91,20 @@ export const TrendingSection = () => {
             }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
           >
-            {trendingTracks.map((track) => (
+            {songs.map((song) => (
               <motion.div
-                key={track.id}
+                key={song.id}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0 },
                 }}
               >
-                <TrackCard {...track} />
+                <TrackCard
+                  title={song.title}
+                  artist={song.artists?.name || "Unknown"}
+                  imageUrl={song.cover_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400"}
+                  plays={`${song.plays_count.toLocaleString()}`}
+                />
               </motion.div>
             ))}
           </motion.div>

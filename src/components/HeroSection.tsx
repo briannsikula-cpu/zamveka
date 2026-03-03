@@ -79,9 +79,11 @@ export const HeroSection = () => {
             transition={{ delay: 0.7 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <GradientButton size="lg" icon={<Play className="w-5 h-5 fill-current" />}>
-              Listen Now
-            </GradientButton>
+            <Link to="/auth">
+              <GradientButton size="lg" icon={<Play className="w-5 h-5 fill-current" />}>
+                Listen Now
+              </GradientButton>
+            </Link>
             <Link to="/apply">
               <GradientButton variant="glass" size="lg" icon={<Headphones className="w-5 h-5" />}>
                 Join as Artist
