@@ -18,10 +18,11 @@
    const [uploading, setUploading] = useState(false);
    const [audioFile, setAudioFile] = useState<File | null>(null);
    const [coverFile, setCoverFile] = useState<File | null>(null);
-   const [formData, setFormData] = useState({
-     title: "",
-     genre: "",
-   });
+    const [formData, setFormData] = useState({
+      title: "",
+      genre: "",
+      lyrics: "",
+    });
  
    const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
      const file = e.target.files?.[0];
@@ -93,23 +94,24 @@
          }
        }
  
-       // Create song record
-       const { error: songError } = await supabase
-         .from('songs')
-         .insert({
-           artist_id: artistId,
-           title: formData.title,
-           file_url: audioUrlData.publicUrl,
-           cover_url: coverUrl,
-           genre: formData.genre || null,
-         });
+        // Create song record
+        const { error: songError } = await supabase
+          .from('songs')
+          .insert({
+            artist_id: artistId,
+            title: formData.title,
+            file_url: audioUrlData.publicUrl,
+            cover_url: coverUrl,
+            genre: formData.genre || null,
+            lyrics: formData.lyrics || null,
+          });
  
        if (songError) throw songError;
  
        toast.success('Song uploaded successfully!');
        onSuccess();
        onClose();
-       setFormData({ title: "", genre: "" });
+       setFormData({ title: "", genre: "", lyrics: "" });
        setAudioFile(null);
        setCoverFile(null);
      } catch (error: any) {
@@ -211,7 +213,21 @@
                  </label>
                </div>
  
-               <GradientButton type="submit" className="w-full" disabled={uploading || !audioFile}>
+                {/* Lyrics (time-synced) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Lyrics (optional, supports time-sync)</label>
+                  <textarea
+                    value={formData.lyrics}
+                    onChange={(e) => setFormData({ ...formData, lyrics: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-primary outline-none transition-all text-sm min-h-[120px] resize-y"
+                    placeholder={"[00:00] First line of the song\n[00:15] Second line...\n[00:30] Or paste plain lyrics"}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Use [mm:ss] format for time-synced lyrics, e.g. [01:23] Your lyric line
+                  </p>
+                </div>
+
+                <GradientButton type="submit" className="w-full" disabled={uploading || !audioFile}>
                  {uploading ? (
                    <span className="flex items-center gap-2">
                      <Upload className="w-4 h-4 animate-pulse" />
