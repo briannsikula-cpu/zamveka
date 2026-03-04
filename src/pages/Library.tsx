@@ -16,7 +16,12 @@ export default function Library() {
   const { currentSong, isPlaying, togglePlay, playSong } = usePlayer();
   const { playlists, loading: playlistsLoading, createPlaylist, deletePlaylist } = usePlaylists();
   const [likedSongs, setLikedSongs] = useState<any[]>([]);
-  const [localFiles, setLocalFiles] = useState<{ name: string; url: string }[]>([]);
+  const [localFiles, setLocalFiles] = useState<{ name: string; url: string }[]>(() => {
+    try {
+      const saved = localStorage.getItem("zv_local_files_meta");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"liked" | "playlists" | "local">("liked");
   const localInputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +47,14 @@ export default function Library() {
       name: f.name.replace(/\.[^/.]+$/, ""),
       url: URL.createObjectURL(f),
     }));
-    setLocalFiles((prev) => [...prev, ...newFiles]);
+    setLocalFiles((prev) => {
+      const updated = [...prev, ...newFiles];
+      // Save metadata (names) to localStorage; URLs are session-only but names persist
+      try {
+        localStorage.setItem("zv_local_files_meta", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     e.target.value = "";
   };
 
