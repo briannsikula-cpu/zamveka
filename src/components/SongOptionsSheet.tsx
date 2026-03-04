@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, Heart, ListPlus, User, Download, X } from "lucide-react";
+import { Share2, Heart, ListPlus, User, Download, X, ListEnd, ListStart } from "lucide-react";
 import { useSongLike } from "@/hooks/useSongLike";
+import { usePlayer } from "@/contexts/PlayerContext";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface SongOptionsSheetProps {
   song: {
@@ -17,6 +19,7 @@ interface SongOptionsSheetProps {
 
 export const SongOptionsSheet = ({ song, open, onClose }: SongOptionsSheetProps) => {
   const { isLiked, toggleLike } = useSongLike(song?.id || "");
+  const { addToQueue, playNextInQueue } = usePlayer();
 
   if (!song) return null;
 
@@ -35,7 +38,33 @@ export const SongOptionsSheet = ({ song, open, onClose }: SongOptionsSheetProps)
     onClose();
   };
 
+  const handleAddToQueue = () => {
+    addToQueue({
+      id: song.id,
+      title: song.title,
+      file_url: song.file_url,
+      cover_url: song.cover_url,
+      artists: song.artists,
+    });
+    toast.success(`"${song.title}" added to queue`);
+    onClose();
+  };
+
+  const handlePlayNext = () => {
+    playNextInQueue({
+      id: song.id,
+      title: song.title,
+      file_url: song.file_url,
+      cover_url: song.cover_url,
+      artists: song.artists,
+    });
+    toast.success(`"${song.title}" will play next`);
+    onClose();
+  };
+
   const options = [
+    { icon: ListStart, label: "Play next", onClick: handlePlayNext },
+    { icon: ListEnd, label: "Add to queue", onClick: handleAddToQueue },
     { icon: Share2, label: "Share", onClick: handleShare },
     { icon: Heart, label: isLiked ? "Remove from Liked Songs" : "Add to Liked Songs", onClick: () => { toggleLike(); onClose(); } },
     { icon: Download, label: "Download", onClick: handleDownload },
@@ -60,12 +89,10 @@ export const SongOptionsSheet = ({ song, open, onClose }: SongOptionsSheetProps)
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl max-h-[80vh] overflow-y-auto"
           >
-            {/* Handle */}
             <div className="flex justify-center pt-3 pb-2">
               <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             </div>
 
-            {/* Song header */}
             <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/20">
               <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                 {song.cover_url ? (
@@ -80,7 +107,6 @@ export const SongOptionsSheet = ({ song, open, onClose }: SongOptionsSheetProps)
               </div>
             </div>
 
-            {/* Options */}
             <div className="py-2">
               {options.map((option, i) => {
                 const content = (
@@ -106,7 +132,6 @@ export const SongOptionsSheet = ({ song, open, onClose }: SongOptionsSheetProps)
               })}
             </div>
 
-            {/* Close */}
             <div className="px-5 pb-6 pt-2">
               <button
                 onClick={onClose}
