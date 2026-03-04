@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Pause, Trash2, Youtube, Music, FileAudio } from "lucide-react";
+import { ArrowLeft, Play, Pause, Trash2, Youtube, Music, FileAudio, MoreVertical } from "lucide-react";
 import { usePlaylists, PlaylistItem } from "@/hooks/usePlaylists";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { BottomNav } from "@/components/BottomNav";
+import { SongOptionsSheet } from "@/components/SongOptionsSheet";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
-import { motion } from "framer-motion";
 
 export default function PlaylistDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +17,7 @@ export default function PlaylistDetail() {
   const [loading, setLoading] = useState(true);
   const [activeYoutube, setActiveYoutube] = useState<string | null>(null);
   const [localFiles, setLocalFiles] = useState<Map<string, string>>(new Map());
+  const [optionsSong, setOptionsSong] = useState<any>(null);
   const localInputRef = useRef<HTMLInputElement>(null);
 
   const playlist = playlists.find((p) => p.id === id);
@@ -63,7 +64,6 @@ export default function PlaylistDetail() {
       const url = URL.createObjectURL(file);
       const tempId = crypto.randomUUID();
       setLocalFiles((prev) => new Map(prev).set(tempId, url));
-      // Add to items locally (not persisted — local files are device-only)
       setItems((prev) => [
         ...prev,
         {
@@ -83,10 +83,21 @@ export default function PlaylistDetail() {
     e.target.value = "";
   };
 
-  const typeIcon = (type: string) => {
-    if (type === "youtube") return <Youtube className="w-4 h-4 text-red-500" />;
-    if (type === "local") return <FileAudio className="w-4 h-4 text-accent" />;
-    return <Music className="w-4 h-4 text-primary" />;
+  const getSongTitle = (item: PlaylistItem) => {
+    if (item.item_type === "app_song") return item.songs?.title || "Unknown";
+    if (item.item_type === "youtube") return item.youtube_title || "YouTube";
+    return item.local_title || "Local File";
+  };
+
+  const getArtistName = (item: PlaylistItem) => {
+    if (item.item_type === "app_song") return item.songs?.artists?.name || "Unknown";
+    if (item.item_type === "youtube") return "YouTube";
+    return "Local file";
+  };
+
+  const isCurrentlyPlaying = (item: PlaylistItem) => {
+    const songId = item.item_type === "app_song" ? item.songs?.id : item.id;
+    return currentSong?.id === songId && isPlaying;
   };
 
   return (
@@ -96,7 +107,8 @@ export default function PlaylistDetail() {
           <ArrowLeft className="w-5 h-5" /> Back
         </button>
         <h1 className="text-2xl font-bold mb-1">{playlist?.name || "Playlist"}</h1>
-        {playlist?.description && <p className="text-sm text-muted-foreground mb-4">{playlist.description}</p>}
+        {playlist?.description && <p className="text-sm text-muted-foreground mb-2">{playlist.description}</p>}
+        <p className="text-xs text-muted-foreground mb-4">{items.length} tracks</p>
 
         <div className="flex gap-2 mb-6">
           <button onClick={handleAddLocalFiles} className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 transition-colors flex items-center gap-1">
@@ -116,61 +128,66 @@ export default function PlaylistDetail() {
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">This playlist is empty</p>
         ) : (
-          <div className="space-y-2">
-            {items.map((item) => (
-              <motion.div
+          <div className="divide-y divide-border/20">
+            {items.map((item, index) => (
+              <div
                 key={item.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-3 rounded-xl flex items-center gap-3"
+                className="flex items-center gap-3 py-3 group"
               >
-                {/* Icon */}
-                <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                  {item.item_type === "app_song" && item.songs?.cover_url ? (
-                    <img src={item.songs.cover_url} alt="" className="w-full h-full object-cover rounded-md" />
-                  ) : (
-                    typeIcon(item.item_type)
-                  )}
-                </div>
+                {/* Track number */}
+                <span className="text-xs text-muted-foreground w-5 text-right shrink-0">{index + 1}</span>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {item.item_type === "app_song" ? item.songs?.title : item.item_type === "youtube" ? item.youtube_title : item.local_title}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {item.item_type === "app_song" ? item.songs?.artists?.name : item.item_type === "youtube" ? "YouTube" : "Local file"}
-                  </p>
-                </div>
-
-                {/* Play */}
+                {/* Play button / Cover */}
                 <button
                   onClick={() => {
                     if (item.item_type === "app_song") handlePlayAppSong(item);
                     else if (item.item_type === "youtube") setActiveYoutube(item.youtube_url!);
                     else handlePlayLocal(item);
                   }}
-                  className="p-2 gradient-button rounded-full"
+                  className="w-10 h-10 rounded-md bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden"
                 >
-                  {item.item_type === "youtube" ? (
-                    <Youtube className="w-4 h-4" />
-                  ) : currentSong?.id === (item.item_type === "app_song" ? item.songs?.id : item.id) && isPlaying ? (
-                    <Pause className="w-4 h-4 fill-current" />
+                  {item.item_type === "app_song" && item.songs?.cover_url ? (
+                    <img src={item.songs.cover_url} alt="" className="w-full h-full object-cover" />
+                  ) : isCurrentlyPlaying(item) ? (
+                    <Pause className="w-4 h-4 text-primary fill-current" />
                   ) : (
-                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                    <Play className="w-4 h-4 text-muted-foreground fill-current ml-0.5" />
                   )}
                 </button>
 
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium truncate ${isCurrentlyPlaying(item) ? "text-primary" : ""}`}>
+                    {getSongTitle(item)}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{getArtistName(item)}</p>
+                </div>
+
+                {/* Type badge */}
+                {item.item_type === "youtube" && <Youtube className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+                {item.item_type === "local" && <FileAudio className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
+
+                {/* Options for app songs */}
+                {item.item_type === "app_song" && item.songs && (
+                  <button
+                    onClick={() => setOptionsSong(item.songs)}
+                    className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+
                 {/* Remove */}
-                <button onClick={() => handleRemove(item.id)} className="p-2 hover:bg-destructive/20 rounded-full transition-colors">
-                  <Trash2 className="w-4 h-4 text-destructive" />
+                <button onClick={() => handleRemove(item.id)} className="p-1.5 hover:bg-destructive/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100">
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
                 </button>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
       </div>
 
+      <SongOptionsSheet song={optionsSong} open={!!optionsSong} onClose={() => setOptionsSong(null)} />
       {currentSong && <MiniPlayer song={currentSong} isPlaying={isPlaying} onTogglePlay={togglePlay} />}
       <BottomNav />
     </div>
