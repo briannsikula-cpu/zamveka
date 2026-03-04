@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, MoreVertical, Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Repeat, Repeat1, Music } from "lucide-react";
+import { ChevronDown, MoreVertical, Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Repeat, Repeat1, Music, SlidersHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useSongLike } from "@/hooks/useSongLike";
 import { useState, useEffect } from "react";
 import { SongOptionsSheet } from "@/components/SongOptionsSheet";
+import { Equalizer } from "@/components/Equalizer";
 import { supabase } from "@/integrations/supabase/client";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const formatTime = (time: number) => {
   const m = Math.floor(time / 60);
@@ -52,6 +54,7 @@ export default function NowPlaying() {
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyrics, setLyrics] = useState<string | null>(null);
+  const [eqOpen, setEqOpen] = useState(false);
 
   useEffect(() => {
     if (currentSong?.id) {
@@ -237,6 +240,21 @@ export default function NowPlaying() {
           >
             {repeatMode === "one" ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
           </button>
+        </div>
+
+        {/* Equalizer Button */}
+        <div className="flex justify-center mt-4">
+          <Sheet open={eqOpen} onOpenChange={setEqOpen}>
+            <SheetTrigger asChild>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground hover:text-foreground transition-colors text-sm">
+                <SlidersHorizontal className="w-4 h-4" />
+                Equalizer
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl">
+              <Equalizer />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
